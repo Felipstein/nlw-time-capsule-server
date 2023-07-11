@@ -1,13 +1,25 @@
 import 'dotenv/config'
 
+import { resolve } from 'path'
+
 import fastify from 'fastify'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
+import multipart from '@fastify/multipart'
+import fstatic from '@fastify/static'
 
 import { memoriesRoutes } from './routes/memories.routes'
 import { authRoutes } from './routes/auth.routes'
+import { uploadRoutes } from './routes/upload.routes'
 
 const app = fastify()
+
+app.register(multipart)
+
+app.register(fstatic, {
+  root: resolve(__dirname, '..', 'uploads'),
+  prefix: '/uploads',
+})
 
 app.register(cors, {
   // origin: true, // todas URLs de front-end poderão acessar nosso back-end
@@ -18,8 +30,9 @@ app.register(jwt, {
   secret: process.env.JWT_SECRET_KEY!,
 })
 
-app.register(memoriesRoutes)
 app.register(authRoutes)
+app.register(uploadRoutes)
+app.register(memoriesRoutes)
 
 app
   .listen({
